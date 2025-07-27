@@ -1,26 +1,26 @@
 {
-  "schemaVersion": 1,
-  "id": "kaifcraft",
-  "version": "${version}",
+	"schemaVersion": 1,
+	"id": "kaifcraft",
+	"version": "${version}",
 
-  "name": "KaifCraft",
-  "description": "This mod aims to get you stoned",
-  "authors": [
-    "kuzme"
-  ],
-  "contact": {
-    "homepage": "",
-    "sources": ""
-  },
+	"name": "KaifCraft",
+	"description": "This mod aims to get yo high",
+	"authors": [
+		"kuzme"
+	],
+	"contact": {
+		"homepage": "",
+		"sources": ""
+	},
 
 	"icon": "icon.png",
-  "license": "CC0-1.0",
+	"license": "CC0-1.0",
 
-  "environment": "*",
-  "entrypoints": {
-    "main": [
+	"environment": "*",
+	"entrypoints": {
+		"main": [
 			"kuzme.kaifcraft.KaifCraftMod"
-    ],
+		],
 		"beforeGameStart": [
 			"kuzme.kaifcraft.KaifCraftMod"
 		],
@@ -28,22 +28,29 @@
 			"kuzme.kaifcraft.KaifCraftMod"
 		],
 		"recipesReady": [
+		],
+		"initModels": [
+			"kuzme.kaifcraft.KaifModelEntrypoint"
+		],
+		"beforeClientStart": [
+			"kuzme.kaifcraft.KaifClient"
+		],
+		"afterClientStart": [
+			"kuzme.kaifcraft.KaifClient"
+		],
+		"server": [
+			"kuzme.kaifcraft.KaifServer"
 		]
 	},
-	"initModels": [
-		"kuzme.kaifcraft.KaifModels"
-	],
-	"beforeClientStart": [
-		"kuzme.kaifcraft.KaifModels"
-	],
-	"mixins": [
-      "kaifcraft.mixins.json"
-  ],
 
-  "depends": {
+	"mixins": [
+		"kaifcraft.mixins.json"
+	],
+
+	"depends": {
 		"minecraft": "*",
-    "fabricloader": ">=0.15.5"
-  },
-  "suggests": {
-  }
+		"fabricloader": ">=0.15.5"
+	},
+	"suggests": {
+	}
 }

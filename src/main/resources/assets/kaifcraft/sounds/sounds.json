@@ -1,0 +1,8 @@
+{
+  "cough": {
+    "subtitle": "subtitles.kaifcraft.cough",
+    "sounds": [
+      "cough.ogg"
+    ]
+  }
+}

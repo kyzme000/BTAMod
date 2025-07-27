@@ -1,6 +1,8 @@
 package kuzme.kaifcraft;
 
+import kuzme.kaifcraft.blocks.KaifBlocks;
 import kuzme.kaifcraft.items.KaifItems;
+import net.minecraft.core.block.Block;
 import net.minecraft.core.item.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ public class KaifConfig {
 	public static int blockIDs = 10000;
 	public static int itemIDs = 20000;
 
+	public static String BlockIDs = "Block IDs";
 	public static String ItemIDs = "Item IDs";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
@@ -30,6 +33,14 @@ public class KaifConfig {
 
 		properties.addCategory("General")
 			.addEntry("cfgVersion", 6);
+
+		properties.addCategory(BlockIDs);
+		properties.addEntry(BlockIDs+".startingFrom", blockIDs);
+		List<Field> blockFields = Arrays.stream(KaifBlocks.class.getDeclaredFields()).filter((F)-> Block.class.isAssignableFrom(F.getType())).collect(Collectors.toList());
+		for (Field blockField : blockFields) {
+			properties.addEntry(BlockIDs + "." + blockField.getName(), blockIDs++);
+		}
+
 		properties.addCategory(ItemIDs);
 		properties.addEntry(ItemIDs+".startingFrom", itemIDs);
 		List<Field> itemFields = Arrays.stream(KaifItems.class.getDeclaredFields()).filter((F)-> Item.class.isAssignableFrom(F.getType())).collect(Collectors.toList());
