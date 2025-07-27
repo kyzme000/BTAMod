@@ -3,7 +3,6 @@ package kuzme.kaifcraft;
 import kuzme.kaifcraft.blocks.KaifBlocks;
 import kuzme.kaifcraft.items.KaifItems;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.core.sound.SoundTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import turniplabs.halplibe.util.GameStartEntrypoint;
@@ -33,7 +32,6 @@ public class KaifCraftMod implements ModInitializer, RecipeEntrypoint, GameStart
 
 	@Override
 	public void beforeGameStart() {
-		SoundTypes.loadSoundsJson(MOD_ID);
 
 	}
 
