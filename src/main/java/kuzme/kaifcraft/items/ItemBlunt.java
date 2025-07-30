@@ -26,23 +26,20 @@ public class ItemBlunt extends Item {
 		double spawnX = entityplayer.x + plylook.x * 0.5;
 		double spawnY = entityplayer.y + plylook.y * 0.5;
 		double spawnZ = entityplayer.z + plylook.z * 0.5;
-		double dx = plylook.x * 2;
+		double dx = plylook.x * 3;
 		double dy = plylook.y * 0.5;
-		double dz = plylook.z * 2;
+		double dz = plylook.z * 3;
 
 		if (this.reloadTimer == 0) {
 			int i;
-			for (i=0; i<=3; i++) {
+			for (i=0; i<=6; i++) {
 				world.spawnParticle(
 					"bigsmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2
-				);
-				world.spawnParticle(
-					"largesmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2
 				);
 			}
 
 			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough", 0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
-			//this.reloadTimer = 50;
+			this.reloadTimer = 30;
 		}
 		return itemstack;
 	}

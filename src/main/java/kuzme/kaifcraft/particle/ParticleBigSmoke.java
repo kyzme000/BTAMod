@@ -42,9 +42,9 @@ public class ParticleBigSmoke extends Particle {
 		}
 
 	    this.move(this.xd, this.yd, this.zd);
-	    this.xd *= 0.9;
-		this.yd *= 0.75;
-	    this.zd *= 0.9;
+	    this.xd *= 0.97;
+		this.yd *= 0.65;
+	    this.zd *= 0.97;
 		if (this.onGround) {
 			this.xd *= 0.7;
 			this.zd *= 0.7;
