@@ -19,15 +19,19 @@ public class ParticleBigSmoke extends Particle {
 		this.rCol = 1;
 		this.gCol = 1;
 		this.bCol = 1;
-		this.size *= 6.0f;
+		this.size *= 5.0f;
 		this.originalScale = this.size;
-		this.lifetime = random.nextInt(40) + 80;
+		this.lifetime = random.nextInt(60) + 80;
 		this.age = 1;
-		this.yd = -Math.abs(this.yd);
+
+		this.xd = xa;
+		this.yd = ya;
+		this.zd = za;
 	}
 	@Override
 	public void render(Tessellator tessellator, float partialTick, double x, double y, double z, float rotationX, float rotationXZ, float rotationZ, float rotationYZ, float rotationXY) {
-		this.size = this.originalScale - this.originalScale * ((float) this.age / this.lifetime);
+		float progress = (float) this.age / this.lifetime;
+		this.size = this.originalScale * (1.0f - progress * 0.6f);
 		super.render(tessellator, partialTick, x, y, z, rotationX, rotationXZ, rotationZ, rotationYZ, rotationXY);
 	}
 
@@ -41,10 +45,17 @@ public class ParticleBigSmoke extends Particle {
 			this.remove();
 		}
 
+		this.yd += 0.0001;
+
+		// Легкие хаотичные колебания по X и Z
+		this.xd += (random.nextDouble() - 0.5) * 0.002;
+		this.zd += (random.nextDouble() - 0.5) * 0.002;
+
+		// Уменьшаем замеёдление по X и Z, чтобы дым дольше летел вперёд
+		this.xd *= 0.992;
+		this.yd *= 0.98;
+		this.zd *= 0.992;
 	    this.move(this.xd, this.yd, this.zd);
-	    this.xd *= 0.97;
-		this.yd *= 0.65;
-	    this.zd *= 0.97;
 		if (this.onGround) {
 			this.xd *= 0.7;
 			this.zd *= 0.7;

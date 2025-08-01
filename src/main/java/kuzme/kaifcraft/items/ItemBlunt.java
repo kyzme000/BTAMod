@@ -22,24 +22,39 @@ public class ItemBlunt extends Item {
 	}
 
 	public ItemStack onUseItem(ItemStack itemstack, World world, Player entityplayer) {
+		entityplayer.sendMessage("world.isClientSide = " + world.isClientSide);
+
 		Vec3 plylook = entityplayer.getLookAngle();
-		double spawnX = entityplayer.x + plylook.x * 0.5;
-		double spawnY = entityplayer.y + plylook.y * 0.5;
-		double spawnZ = entityplayer.z + plylook.z * 0.5;
-		double dx = plylook.x * 3;
-		double dy = plylook.y * 0.5;
-		double dz = plylook.z * 3;
+		Vec3 right = plylook.crossProduct(Vec3.getTempVec3(0, 1, 0)).normalize();
+
 
 		if (this.reloadTimer == 0) {
-			int i;
-			for (i=0; i<=6; i++) {
-				world.spawnParticle(
-					"bigsmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2
-				);
+			int count = 3;
+			double spacing = 0.6;
+			double speed = 0.05;
+
+			for (int i = 0; i < count; i++) {
+				double offsetIndex = i - (count - 1) / 2.0;
+
+				double offsetX = right.x * offsetIndex * spacing;
+				double offsetY = right.y * offsetIndex * spacing;
+				double offsetZ = right.z * offsetIndex * spacing;
+
+				double spawnX = entityplayer.x + plylook.x * 0.5 + offsetX;
+				double spawnY = entityplayer.y + plylook.y * 0.5 + offsetY;
+				double spawnZ = entityplayer.z + plylook.z * 0.5 + offsetZ;
+
+				Vec3 direction = entityplayer.getLookAngle().normalize();
+
+				double dx = direction.x * speed;
+				double dy = direction.y * speed;
+				double dz = direction.z * speed;
+
+				world.spawnParticle("bigsmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2);
 			}
 
 			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough", 0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
-			this.reloadTimer = 30;
+			this.reloadTimer = 5;
 		}
 		return itemstack;
 	}
