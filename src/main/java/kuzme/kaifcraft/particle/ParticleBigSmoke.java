@@ -1,7 +1,10 @@
 package kuzme.kaifcraft.particle;
 
 
+import com.mojang.nbt.tags.CompoundTag;
+import kuzme.kaifcraft.mixin.MobCreeperMixin;
 import kuzme.kaifcraft.mixin.accessors.MobCreeperAccessor;
+import kuzme.kaifcraft.util.IKaifNbt;
 import net.minecraft.client.entity.particle.Particle;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.client.render.texture.stitcher.IconCoordinate;
@@ -81,7 +84,7 @@ public class ParticleBigSmoke extends Particle {
 
 			List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, checkArea);
 			for (Entity entity : list) {
-				if (entity instanceof MobCreeper) {
+				if (entity instanceof MobCreeper && entity instanceof IKaifNbt) {
 					MobCreeper creeper = (MobCreeper) entity;
 					MobCreeperAccessor accessor = (MobCreeperAccessor) (Object) creeper;
 
@@ -91,7 +94,9 @@ public class ParticleBigSmoke extends Particle {
 					if (time > 0 || state > 0) {
 						System.out.println(state);
 						accessor.setTimeSinceIgnited(Math.max(0, time - 1));
-						accessor.invokeSetCreeperState(0); // состояние покоя
+						accessor.invokeSetCreeperState(0);
+						CompoundTag tag = ((IKaifNbt) entity).getKaifData();
+						tag.putBoolean("DisableAI", true);
 					}
 				}
 			}

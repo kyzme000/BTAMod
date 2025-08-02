@@ -1,7 +1,6 @@
 package kuzme.kaifcraft.mixin.accessors;
 
 import net.minecraft.core.entity.monster.MobCreeper;
-import net.minecraft.core.world.data.SynchedEntityData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;

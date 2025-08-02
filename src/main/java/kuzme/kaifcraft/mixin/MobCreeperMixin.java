@@ -1,25 +1,27 @@
 package kuzme.kaifcraft.mixin;
 
 import com.mojang.nbt.tags.CompoundTag;
-import kuzme.kaifcraft.KaifcraftNBT;
 import kuzme.kaifcraft.mixin.accessors.MobCreeperAccessor;
+import kuzme.kaifcraft.util.IKaifNbt;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.monster.MobCreeper;
 import net.minecraft.core.entity.monster.MobMonster;
 import net.minecraft.core.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = MobCreeper.class, remap = false)
-public abstract class MobCreeperMixin extends MobMonster implements KaifcraftNBT {
+public abstract class MobCreeperMixin extends MobMonster implements IKaifNbt {
 	public MobCreeperMixin(@Nullable World world) {
 		super(world);
 	}
 
-	private final CompoundTag customData = new CompoundTag();
+	@Unique
+	private final CompoundTag kaifData = new CompoundTag();
 	private boolean fuseSoundPlayed = false;
 
 	@Inject(method = "attackEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/world/World;playSoundAtEntity(Lnet/minecraft/core/entity/Entity;Lnet/minecraft/core/entity/Entity;Ljava/lang/String;FF)V"), cancellable = true)
@@ -49,9 +51,8 @@ public abstract class MobCreeperMixin extends MobMonster implements KaifcraftNBT
 		}
 	}
 
-
 	@Override
-	public CompoundTag getCustomData() {
-		return customData;
+	public CompoundTag getKaifData() {
+		return kaifData;
 	}
 }
