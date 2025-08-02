@@ -4,7 +4,8 @@
     "package": "kuzme.kaifcraft.mixin",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-      "MobCreeperMixin"
+      "MobCreeperMixin",
+      "accessors.MobCreeperAccessor"
     ],
     "client": [
     ],

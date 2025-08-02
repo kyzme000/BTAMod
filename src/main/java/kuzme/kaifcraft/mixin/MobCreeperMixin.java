@@ -1,61 +1,57 @@
 package kuzme.kaifcraft.mixin;
 
-import kuzme.kaifcraft.particle.ParticleBigSmoke;
+import com.mojang.nbt.tags.CompoundTag;
+import kuzme.kaifcraft.KaifcraftNBT;
+import kuzme.kaifcraft.mixin.accessors.MobCreeperAccessor;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.monster.MobCreeper;
 import net.minecraft.core.entity.monster.MobMonster;
-import net.minecraft.core.util.phys.AABB;
 import net.minecraft.core.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
 @Mixin(value = MobCreeper.class, remap = false)
-public abstract class MobCreeperMixin extends MobMonster {
-
-
+public abstract class MobCreeperMixin extends MobMonster implements KaifcraftNBT {
 	public MobCreeperMixin(@Nullable World world) {
 		super(world);
 	}
-	@Shadow private int timeSinceIgnited;
-	@Shadow public abstract void setCreeperState(int state);
 
-	@Inject(
-		method = "attackEntity(Lnet/minecraft/core/entity/Entity;F)V",
-		at = @At("HEAD"),
-		cancellable = true
-	)
-	private void attackEntity(Entity entity, float distance, CallbackInfo ci) {
-		System.out.println("Mixin injected!");
-		if (isSmoked()) {
-			this.setCreeperState(-1);
-			this.timeSinceIgnited = 0;
-			ci.cancel();  // отменяем вызов createExplosion и дальнейшее выполнение
+	private final CompoundTag customData = new CompoundTag();
+	private boolean fuseSoundPlayed = false;
+
+	@Inject(method = "attackEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/world/World;playSoundAtEntity(Lnet/minecraft/core/entity/Entity;Lnet/minecraft/core/entity/Entity;Ljava/lang/String;FF)V"), cancellable = true)
+	private void onPlayFuseSound(Entity target, float distance, CallbackInfo ci) {
+		MobCreeper self = (MobCreeper)(Object)this;
+
+		// Если звук уже сыгран, отменяем вызов, чтобы не играть снова
+		if (fuseSoundPlayed) {
+			ci.cancel(); // отменяем оригинальный вызов playSoundAtEntity
+			return;
+		}
+
+		// Отмечаем, что звук сыгран
+		fuseSoundPlayed = true;
+	}
+
+	@Inject(method = "attackEntity", at = @At("TAIL"))
+	private void atEndOfAttackEntity(Entity target, float distance, CallbackInfo ci) {
+		MobCreeper self = (MobCreeper)(Object)this;
+		MobCreeperAccessor accessor = (MobCreeperAccessor) (Object) self;
+
+		int time = accessor.getTimeSinceIgnited();
+
+		// Если крипер перестал зажигаться — сбрасываем флаг звука
+		if (time == 0) {
+			fuseSoundPlayed = false;
 		}
 	}
 
-	private boolean isSmoked() {
 
-		AABB aabb = AABB.getPermanentBB(
-			this.x - 2.0,
-			this.y - 2.0,
-			this.z - 2.0,
-			this.x + 2.0,
-			this.y + 2.0,
-			this.z + 2.0
-		);
-		List<Entity> nearby = this.world.getEntitiesWithinAABBExcludingEntity(this, aabb);
-		for (Entity e : nearby) {
-			if (e instanceof ParticleBigSmoke) {
-				System.out.println("smoked!");
-				return true;
-			}
-		}
-		return false;
+	@Override
+	public CompoundTag getCustomData() {
+		return customData;
 	}
 }

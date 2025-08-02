@@ -1,10 +1,17 @@
 package kuzme.kaifcraft.particle;
 
+
+import kuzme.kaifcraft.mixin.accessors.MobCreeperAccessor;
 import net.minecraft.client.entity.particle.Particle;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.client.render.texture.stitcher.IconCoordinate;
 import net.minecraft.client.render.texture.stitcher.TextureRegistry;
+import net.minecraft.core.entity.Entity;
+import net.minecraft.core.entity.monster.MobCreeper;
+import net.minecraft.core.util.phys.AABB;
 import net.minecraft.core.world.World;
+
+import java.util.List;
 
 import static kuzme.kaifcraft.KaifCraftMod.MOD_ID;
 
@@ -28,6 +35,7 @@ public class ParticleBigSmoke extends Particle {
 		this.yd = ya;
 		this.zd = za;
 	}
+
 	@Override
 	public void render(Tessellator tessellator, float partialTick, double x, double y, double z, float rotationX, float rotationXZ, float rotationZ, float rotationYZ, float rotationXY) {
 		float progress = (float) this.age / this.lifetime;
@@ -59,6 +67,35 @@ public class ParticleBigSmoke extends Particle {
 		if (this.onGround) {
 			this.xd *= 0.7;
 			this.zd *= 0.7;
+		}
+
+		if (this.age % 2 == 0) {
+			AABB checkArea = AABB.getTemporaryBB(
+				this.x - 2.0,
+				this.y - 2.0,
+				this.z - 2.0,
+				this.x + 2.0,
+				this.y + 2.0,
+				this.z + 2.0
+			);
+
+			List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, checkArea);
+			for (Entity entity : list) {
+				if (entity instanceof MobCreeper) {
+					MobCreeper creeper = (MobCreeper) entity;
+					MobCreeperAccessor accessor = (MobCreeperAccessor) (Object) creeper;
+
+					int time = accessor.getTimeSinceIgnited();
+					int state = ((MobCreeperAccessor) (Object) creeper).invokeGetCreeperState();
+
+					if (time > 0 || state > 0) {
+						System.out.println(state);
+						accessor.setTimeSinceIgnited(Math.max(0, time - 1));
+						accessor.invokeSetCreeperState(0); // состояние покоя
+					}
+				}
+			}
+
 		}
 	}
 }
