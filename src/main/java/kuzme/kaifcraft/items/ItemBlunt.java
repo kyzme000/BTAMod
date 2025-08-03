@@ -22,7 +22,6 @@ public class ItemBlunt extends Item {
 	}
 
 	public ItemStack onUseItem(ItemStack itemstack, World world, Player entityplayer) {
-		entityplayer.sendMessage("world.isClientSide = " + world.isClientSide);
 
 		Vec3 plylook = entityplayer.getLookAngle();
 		Vec3 right = plylook.crossProduct(Vec3.getTempVec3(0, 1, 0)).normalize();

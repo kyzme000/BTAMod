@@ -22,6 +22,16 @@ public abstract class MobMonsterMixin extends MobPathfinder implements Enemy {
 		if (this instanceof IKaifNbt) {
 			CompoundTag tag = ((IKaifNbt)this).getKaifData();
 			if (tag.getBoolean("DisableAI")) {
+				int timer = tag.getInteger("DisableAITimer");
+				if (timer > 0) {
+					tag.putInt("DisableAITimer", timer - 1);
+				} else {
+					tag.putBoolean("DisableAI", false);
+					tag.putInt("DisableAITimer", 0);
+					System.out.println("[MobMonsterMixin] Re-enabled AI for: " + this.getClass().getSimpleName());
+				}
+			}
+			if (tag.getBoolean("DisableAI")) {
 				ci.cancel();
 			}
 		}

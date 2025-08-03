@@ -10,6 +10,9 @@
     ],
     "client": [
     ],
+    "server": [
+      "PacketHandlerServerMixin"
+    ],
     "injectors": {
         "defaultRequire": 1
   }

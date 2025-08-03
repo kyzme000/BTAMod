@@ -24,6 +24,7 @@ public abstract class MobCreeperMixin extends MobMonster implements IKaifNbt {
 	private final CompoundTag kaifData = new CompoundTag();
 	private boolean fuseSoundPlayed = false;
 
+
 	@Inject(method = "attackEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/world/World;playSoundAtEntity(Lnet/minecraft/core/entity/Entity;Lnet/minecraft/core/entity/Entity;Ljava/lang/String;FF)V"), cancellable = true)
 	private void onPlayFuseSound(Entity target, float distance, CallbackInfo ci) {
 		MobCreeper self = (MobCreeper)(Object)this;
@@ -51,8 +52,30 @@ public abstract class MobCreeperMixin extends MobMonster implements IKaifNbt {
 		}
 	}
 
+	@Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
+	private void addAdditionalMixin(CompoundTag tag, CallbackInfo ci) {
+		tag.put("KaifcraftData", kaifData);
+	}
+
+	@Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
+	private void readAdditionalMixin(CompoundTag tag, CallbackInfo ci) {
+		if (tag.containsKey("KaifcraftData")) {
+			CompoundTag loaded = tag.getCompound("KaifcraftData");
+			this.kaifData.getValue().clear();
+			for (String key : loaded.getValue().keySet()) {
+				this.kaifData.put(key, loaded.getTag(key));
+			}
+		}
+	}
+
 	@Override
 	public CompoundTag getKaifData() {
 		return kaifData;
+	}
+	@Override
+	public void setDisableAITimer(int ticks) {
+		kaifData.putInt("DisableAITimer", ticks);
+		kaifData.putBoolean("DisableAI", true);
+		System.out.println("[MobCreeperMixin] Set DisableAITimer = " + ticks);
 	}
 }

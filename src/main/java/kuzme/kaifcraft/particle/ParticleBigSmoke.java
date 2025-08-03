@@ -47,31 +47,12 @@ public class ParticleBigSmoke extends Particle {
 	}
 
 	public void tick() {
+		System.out.println("zzzz");
 		this.tex = (this.age / 50) % 2 == 0 ? bigSmoke1 : bigSmoke2;
 
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
-			this.remove();
-		}
-
-		this.yd += 0.0001;
-
-		// Легкие хаотичные колебания по X и Z
-		this.xd += (random.nextDouble() - 0.5) * 0.002;
-		this.zd += (random.nextDouble() - 0.5) * 0.002;
-
-		// Уменьшаем замеёдление по X и Z, чтобы дым дольше летел вперёд
-		this.xd *= 0.992;
-		this.yd *= 0.98;
-		this.zd *= 0.992;
-	    this.move(this.xd, this.yd, this.zd);
-		if (this.onGround) {
-			this.xd *= 0.7;
-			this.zd *= 0.7;
-		}
-
 		if (this.age % 2 == 0) {
 			AABB checkArea = AABB.getTemporaryBB(
 				this.x - 2.0,
@@ -95,12 +76,39 @@ public class ParticleBigSmoke extends Particle {
 						System.out.println(state);
 						accessor.setTimeSinceIgnited(Math.max(0, time - 1));
 						accessor.invokeSetCreeperState(0);
-						CompoundTag tag = ((IKaifNbt) entity).getKaifData();
-						tag.putBoolean("DisableAI", true);
+						((IKaifNbt) entity).setDisableAITimer(60);
+						accessor.setTimeSinceIgnited(1);
+						accessor.invokeSetCreeperState(1);
+						CompoundTag timer = ((IKaifNbt) entity).getKaifData();
+						if (timer.getInteger("DisableAITimer") <= 0) {
+							((IKaifNbt) entity).setDisableAITimer(60);
+						}
+
 					}
 				}
 			}
 
 		}
+		if (this.age++ >= this.lifetime) {
+			this.remove();
+		}
+
+		this.yd += 0.0001;
+
+		// Легкие хаотичные колебания по X и Z
+		this.xd += (random.nextDouble() - 0.5) * 0.002;
+		this.zd += (random.nextDouble() - 0.5) * 0.002;
+
+		// Уменьшаем замеёдление по X и Z, чтобы дым дольше летел вперёд
+		this.xd *= 0.992;
+		this.yd *= 0.98;
+		this.zd *= 0.992;
+	    this.move(this.xd, this.yd, this.zd);
+		if (this.onGround) {
+			this.xd *= 0.7;
+			this.zd *= 0.7;
+		}
+
+
 	}
 }
