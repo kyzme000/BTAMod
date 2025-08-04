@@ -1,6 +1,7 @@
-package kuzme.kaifcraft.items;
+package kuzme.kaifcraft.item;
 
 
+import kuzme.kaifcraft.entity.EntitySmoke;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.Item;
@@ -31,26 +32,41 @@ public class ItemBlunt extends Item {
 			int count = 3;
 			double spacing = 0.6;
 			double speed = 0.05;
+			double distanceForward = 2;
 
 			for (int i = 0; i < count; i++) {
 				double offsetIndex = i - (count - 1) / 2.0;
 
-				double offsetX = right.x * offsetIndex * spacing;
-				double offsetY = right.y * offsetIndex * spacing;
-				double offsetZ = right.z * offsetIndex * spacing;
+				// Сдвиг по правой стороне (общий)
+				double sideOffsetX = right.x * offsetIndex * spacing;
+				double sideOffsetY = right.y * offsetIndex * spacing;
+				double sideOffsetZ = right.z * offsetIndex * spacing;
 
-				double spawnX = entityplayer.x + plylook.x * 0.5 + offsetX;
-				double spawnY = entityplayer.y + plylook.y * 0.5 + offsetY;
-				double spawnZ = entityplayer.z + plylook.z * 0.5 + offsetZ;
+				// ---------- Сущность ----------
+				double spawnX = entityplayer.x + plylook.x * distanceForward + sideOffsetX;
+				double spawnY = entityplayer.y + entityplayer.getHeadHeight() + plylook.y * distanceForward + sideOffsetY;
+				double spawnZ = entityplayer.z + plylook.z * distanceForward + sideOffsetZ;
 
-				Vec3 direction = entityplayer.getLookAngle().normalize();
+				Vec3 direction = plylook.normalize();
 
 				double dx = direction.x * speed;
 				double dy = direction.y * speed;
 				double dz = direction.z * speed;
 
-				world.spawnParticle("bigsmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2);
+				EntitySmoke smoke = new EntitySmoke(world, spawnX, spawnY, spawnZ);
+				world.entityJoinedWorld(smoke);
+
+				// ---------- Частица (опционально) ----------
+				double px = spawnX;
+				double py = spawnY;
+				double pz = spawnZ;
+				double pdx = dx;
+				double pdy = dy;
+				double pdz = dz;
+
+				world.spawnParticle("bigsmoke", px, py, pz, pdx, pdy, pdz, 2);
 			}
+
 
 			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough", 0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
 			this.reloadTimer = 5;

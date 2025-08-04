@@ -1,7 +1,7 @@
 package kuzme.kaifcraft;
 
-import kuzme.kaifcraft.blocks.KaifBlocks;
-import kuzme.kaifcraft.items.KaifItems;
+import kuzme.kaifcraft.block.KaifBlocks;
+import kuzme.kaifcraft.item.KaifItems;
 import net.minecraft.core.block.Block;
 import net.minecraft.core.item.Item;
 import org.slf4j.Logger;

@@ -1,12 +1,10 @@
-package kuzme.kaifcraft.items;
+package kuzme.kaifcraft.item;
 
 import kuzme.kaifcraft.KaifConfig;
 import net.minecraft.core.item.Item;
 import turniplabs.halplibe.helper.ItemBuilder;
 import turniplabs.halplibe.util.ItemInitEntrypoint;
 
-
-import java.util.HashMap;
 
 import static kuzme.kaifcraft.KaifCraftMod.MOD_ID;
 

@@ -1,4 +1,4 @@
-package kuzme.kaifcraft.blocks;
+package kuzme.kaifcraft.block;
 
 import kuzme.kaifcraft.KaifConfig;
 

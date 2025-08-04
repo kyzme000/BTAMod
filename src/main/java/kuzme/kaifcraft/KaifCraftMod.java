@@ -1,7 +1,8 @@
 package kuzme.kaifcraft;
 
-import kuzme.kaifcraft.blocks.KaifBlocks;
-import kuzme.kaifcraft.items.KaifItems;
+import kuzme.kaifcraft.block.KaifBlocks;
+import kuzme.kaifcraft.entity.KaifEntities;
+import kuzme.kaifcraft.item.KaifItems;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class KaifCraftMod implements ModInitializer, RecipeEntrypoint, GameStart
 		LOGGER.info("VIRUSNYA");
 		new KaifItems().initializeItems();
 		new KaifBlocks().initializeBlocks();
+		new KaifEntities().initializeEntities();
     }
 
 	@Override

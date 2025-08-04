@@ -1,20 +1,11 @@
 package kuzme.kaifcraft.particle;
 
 
-import com.mojang.nbt.tags.CompoundTag;
-import kuzme.kaifcraft.mixin.MobCreeperMixin;
-import kuzme.kaifcraft.mixin.accessors.MobCreeperAccessor;
-import kuzme.kaifcraft.util.IKaifNbt;
 import net.minecraft.client.entity.particle.Particle;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.client.render.texture.stitcher.IconCoordinate;
 import net.minecraft.client.render.texture.stitcher.TextureRegistry;
-import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.monster.MobCreeper;
-import net.minecraft.core.util.phys.AABB;
 import net.minecraft.core.world.World;
-
-import java.util.List;
 
 import static kuzme.kaifcraft.KaifCraftMod.MOD_ID;
 
@@ -53,42 +44,7 @@ public class ParticleBigSmoke extends Particle {
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		if (this.age % 2 == 0) {
-			AABB checkArea = AABB.getTemporaryBB(
-				this.x - 2.0,
-				this.y - 2.0,
-				this.z - 2.0,
-				this.x + 2.0,
-				this.y + 2.0,
-				this.z + 2.0
-			);
 
-			List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, checkArea);
-			for (Entity entity : list) {
-				if (entity instanceof MobCreeper && entity instanceof IKaifNbt) {
-					MobCreeper creeper = (MobCreeper) entity;
-					MobCreeperAccessor accessor = (MobCreeperAccessor) (Object) creeper;
-
-					int time = accessor.getTimeSinceIgnited();
-					int state = ((MobCreeperAccessor) (Object) creeper).invokeGetCreeperState();
-
-					if (time > 0 || state > 0) {
-						System.out.println(state);
-						accessor.setTimeSinceIgnited(Math.max(0, time - 1));
-						accessor.invokeSetCreeperState(0);
-						((IKaifNbt) entity).setDisableAITimer(60);
-						accessor.setTimeSinceIgnited(1);
-						accessor.invokeSetCreeperState(1);
-						CompoundTag timer = ((IKaifNbt) entity).getKaifData();
-						if (timer.getInteger("DisableAITimer") <= 0) {
-							((IKaifNbt) entity).setDisableAITimer(60);
-						}
-
-					}
-				}
-			}
-
-		}
 		if (this.age++ >= this.lifetime) {
 			this.remove();
 		}

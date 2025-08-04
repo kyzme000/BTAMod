@@ -1,5 +1,6 @@
 package kuzme.kaifcraft.mixin;
 
+import com.mojang.nbt.tags.CompoundTag;
 import kuzme.kaifcraft.util.IKaifNbt;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.monster.MobCreeper;
@@ -56,12 +57,13 @@ public abstract class PacketHandlerServerMixin {
 				return;
 			}
 
-			if (entity instanceof MobCreeper && entity instanceof IKaifNbt) {
-				IKaifNbt kaifNbt = (IKaifNbt) entity;
-				kaifNbt.setDisableAITimer(disableTicks);
-				System.out.println("[Kaifcraft] Установлен DisableAITimer = " + disableTicks + " для крипера " + entityId);
+			boolean disableAI = dataInputStream.readBoolean();
+			if (entity instanceof IKaifNbt) {
+				CompoundTag tag = ((IKaifNbt) entity).getKaifData();
+				tag.putBoolean("DisableAI", disableAI);
+				System.out.println("[Kaifcraft] DisableAI установлен в " + disableAI + " для " + entity.getClass().getSimpleName());
 			} else {
-				System.err.println("[Kaifcraft] Сущность не MobCreeper или не реализует IKaifNbt: " + entity.getClass().getSimpleName());
+				System.err.println("[Kaifcraft] Сущность не реализует IKaifNbt");
 			}
 
 		} catch (IOException e) {

@@ -12,8 +12,7 @@ import turniplabs.halplibe.helper.ModelHelper;
 import turniplabs.halplibe.util.ModelEntrypoint;
 
 import static kuzme.kaifcraft.KaifCraftMod.MOD_ID;
-import static kuzme.kaifcraft.blocks.KaifBlocks.*;
-import static kuzme.kaifcraft.items.KaifItems.*;
+import static kuzme.kaifcraft.item.KaifItems.*;
 
 public class KaifModelEntrypoint implements ModelEntrypoint {
 	@Override
