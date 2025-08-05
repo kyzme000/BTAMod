@@ -6,6 +6,7 @@
     "mixins": [
       "MobCreeperMixin",
       "MobMonsterMixin",
+      "MobSpiderMixin",
       "accessors.MobCreeperAccessor"
     ],
     "client": [
