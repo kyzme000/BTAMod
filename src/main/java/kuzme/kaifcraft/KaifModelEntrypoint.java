@@ -1,5 +1,7 @@
 package kuzme.kaifcraft;
 
+import kuzme.kaifcraft.entity.EmptyRenderer;
+import kuzme.kaifcraft.entity.EntitySmoke;
 import net.minecraft.client.render.EntityRenderDispatcher;
 import net.minecraft.client.render.TileEntityRenderDispatcher;
 import net.minecraft.client.render.block.color.BlockColorDispatcher;
@@ -30,6 +32,8 @@ public class KaifModelEntrypoint implements ModelEntrypoint {
 
 	@Override
 	public void initEntityModels(EntityRenderDispatcher dispatcher) {
+
+		ModelHelper.setEntityModel(EntitySmoke.class, EmptyRenderer::new);
 
 	}
 

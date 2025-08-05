@@ -23,8 +23,7 @@ import java.util.Set;
 public class EntitySmoke extends Entity {
 	private int lifetime = 60; // тики
 	private int age = 0;
-	private final Set<Integer> syncedCreepers = new HashSet<>();
-
+	private final Set<Integer> syncedEntities = new HashSet<>();
 	public EntitySmoke(@Nullable World world, double x, double y, double z) {
 		super(world);
 		this.setPos(x, y, z);
@@ -52,49 +51,54 @@ public class EntitySmoke extends Entity {
 
 		List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this, checkArea);
 		for (Entity entity : list) {
-			if (entity instanceof IKaifNbt) {
-				IKaifNbt kaifNbt = (IKaifNbt) entity;
-				CompoundTag tagToSend = kaifNbt.getKaifData();
+			if (!(entity instanceof IKaifNbt)) continue;
 
-				try {
-					ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-					DataOutputStream dataOutput = new DataOutputStream(byteOutput);
+			if (syncedEntities.contains(entity.id)) continue;
+			syncedEntities.add(entity.id);
 
-					dataOutput.writeInt(entity.id); // ID сущности
-					NbtIo.write(tagToSend, dataOutput); // сериализация тега
+			IKaifNbt kaifNbt = (IKaifNbt) entity;
+			CompoundTag tagToSend = kaifNbt.getKaifData();
 
-					byte[] bytes = byteOutput.toByteArray();
-					PacketCustomPayload packet = new PacketCustomPayload("Kaif|Creeper", bytes);
+			try {
+				ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+				DataOutputStream dataOutput = new DataOutputStream(byteOutput);
 
+				dataOutput.writeInt(entity.id); // ID сущности
+				NbtIo.write(tagToSend, dataOutput); // сериализация тега
+
+				byte[] bytes = byteOutput.toByteArray();
+				PacketCustomPayload packet = new PacketCustomPayload("Kaif|Creeper", bytes);
+
+				if (this.world.isClientSide) {
+					// Только на клиенте — отправляем пакет
 					Minecraft.getMinecraft().getSendQueue().addToSendQueue(packet);
-					System.out.println("[EntitySmokeMixin] Отправлен Kaif|Creeper пакет с NBT");
-
-				} catch (IOException e) {
-					System.err.println("[EntitySmokeMixin] Ошибка при отправке NBT крипера: " + e);
 				}
-				if (kaifNbt.getKaifData().getInteger("DisableAITimer") <= 0) {
+				System.out.println("[EntitySmoke] Отправлен Kaif|Creeper пакет с NBT");
+
+			} catch (IOException e) {
+				System.err.println("[EntitySmoke] Ошибка при отправке NBT: " + e);
+			}
+
+			if (tagToSend.getInteger("DisableAITimer") <= 0) {
+				kaifNbt.setDisableAITimer(200);
+			}
+
+			if (entity instanceof MobCreeper) {
+				MobCreeper creeper = (MobCreeper) entity;
+				MobCreeperAccessor accessor = (MobCreeperAccessor) creeper;
+
+				int time = accessor.getTimeSinceIgnited();
+				int state = accessor.invokeGetCreeperState();
+
+				if (time > 0 || state > 0) {
+					System.out.println("[EntitySmoke] Creeper state: " + state);
+					accessor.setTimeSinceIgnited(1);
+					accessor.invokeSetCreeperState(1);
 					kaifNbt.setDisableAITimer(60);
 				}
 			}
-			if (entity instanceof MobCreeper) {
-				MobCreeper creeper = (MobCreeper) entity;
-				MobCreeperAccessor accessor = (MobCreeperAccessor) (Object) creeper;
-
-				int time = accessor.getTimeSinceIgnited();
-				int state = ((MobCreeperAccessor) (Object) creeper).invokeGetCreeperState();
-
-				if (time > 0 || state > 0) {
-					System.out.println(state);
-					accessor.setTimeSinceIgnited(Math.max(0, time - 1));
-					accessor.invokeSetCreeperState(0);
-					((IKaifNbt) entity).setDisableAITimer(60);
-					accessor.setTimeSinceIgnited(1);
-					accessor.invokeSetCreeperState(1);
-				}
-			}
-
-			}
 		}
+	}
 	@Override
 	public void readAdditionalSaveData(@NotNull CompoundTag compoundTag) {
 	}

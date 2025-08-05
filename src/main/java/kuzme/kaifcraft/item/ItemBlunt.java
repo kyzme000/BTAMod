@@ -37,35 +37,30 @@ public class ItemBlunt extends Item {
 			for (int i = 0; i < count; i++) {
 				double offsetIndex = i - (count - 1) / 2.0;
 
-				// Сдвиг по правой стороне (общий)
-				double sideOffsetX = right.x * offsetIndex * spacing;
-				double sideOffsetY = right.y * offsetIndex * spacing;
-				double sideOffsetZ = right.z * offsetIndex * spacing;
+				double offsetX = right.x * offsetIndex * spacing;
+				double offsetY = right.y * offsetIndex * spacing;
+				double offsetZ = right.z * offsetIndex * spacing;
 
-				// ---------- Сущность ----------
-				double spawnX = entityplayer.x + plylook.x * distanceForward + sideOffsetX;
-				double spawnY = entityplayer.y + entityplayer.getHeadHeight() + plylook.y * distanceForward + sideOffsetY;
-				double spawnZ = entityplayer.z + plylook.z * distanceForward + sideOffsetZ;
+				double spawnX = entityplayer.x + plylook.x * 0.5 + offsetX;
+				double spawnY = entityplayer.y + plylook.y * 0.5 + offsetY;
+				double spawnZ = entityplayer.z + plylook.z * 0.5 + offsetZ;
 
-				Vec3 direction = plylook.normalize();
+				Vec3 direction = entityplayer.getLookAngle().normalize();
 
 				double dx = direction.x * speed;
 				double dy = direction.y * speed;
 				double dz = direction.z * speed;
 
-				EntitySmoke smoke = new EntitySmoke(world, spawnX, spawnY, spawnZ);
-				world.entityJoinedWorld(smoke);
-
-				// ---------- Частица (опционально) ----------
-				double px = spawnX;
-				double py = spawnY;
-				double pz = spawnZ;
-				double pdx = dx;
-				double pdy = dy;
-				double pdz = dz;
-
-				world.spawnParticle("bigsmoke", px, py, pz, pdx, pdy, pdz, 2);
+				world.spawnParticle("bigsmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2);
 			}
+			double entitySpawnX = entityplayer.x + plylook.x * distanceForward;
+			double entitySpawnY = entityplayer.y + plylook.y * distanceForward;
+			double entitySpawnZ = entityplayer.z + plylook.z * distanceForward;
+
+
+		    EntitySmoke smoke = new EntitySmoke(world, entitySpawnX, entitySpawnY, entitySpawnZ);
+		    world.entityJoinedWorld(smoke);
+
 
 
 			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough", 0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
