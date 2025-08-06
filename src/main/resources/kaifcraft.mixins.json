@@ -7,6 +7,7 @@
       "MobCreeperMixin",
       "MobMonsterMixin",
       "MobSpiderMixin",
+      "MinecraftMixin",
       "accessors.MobCreeperAccessor"
     ],
     "client": [

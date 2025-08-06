@@ -1,9 +1,11 @@
 package kuzme.kaifcraft.mixin;
 
 import com.mojang.nbt.tags.CompoundTag;
+import kuzme.kaifcraft.item.ItemBlunt;
 import kuzme.kaifcraft.util.IKaifNbt;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.monster.MobCreeper;
+import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.net.packet.PacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.entity.player.PlayerServer;
@@ -31,44 +33,66 @@ public abstract class PacketHandlerServerMixin {
 		remap = false
 	)
 	private void kaifcraft$onHandleCustomPayload(PacketCustomPayload packet, CallbackInfo ci) {
+		System.out.println("[Kaifcraft] PacketHandlerServerMixin injected");
 		System.out.println("[Kaifcraft] Packet received: " + packet.channel);
-		if (!"Kaif|Creeper".equals(packet.channel)) return;
 
-		try (ByteArrayInputStream byteInput = new ByteArrayInputStream(packet.data);
-			 DataInputStream dataInputStream = new DataInputStream(byteInput)) {
+		if ("Kaif|Creeper".equals(packet.channel)) {
+			// Обработка Kaif|Creeper, твой существующий код
+			try (ByteArrayInputStream byteInput = new ByteArrayInputStream(packet.data);
+				 DataInputStream dataInputStream = new DataInputStream(byteInput)) {
 
-			int entityId = dataInputStream.readInt();
-			int disableTicks = dataInputStream.readInt();
+				int entityId = dataInputStream.readInt();
+				int disableTicks = dataInputStream.readInt();
 
-			MinecraftServer server = playerEntity.mcServer;
-			WorldServer world = server.getDimensionWorld(playerEntity.dimension);
+				MinecraftServer server = playerEntity.mcServer;
+				WorldServer world = server.getDimensionWorld(playerEntity.dimension);
 
-			// Поиск сущности вручную
-			Entity entity = null;
-			for (Entity e : world.loadedEntityList) {
-				if (e.id == entityId) {
-					entity = e;
-					break;
+				Entity entity = null;
+				for (Entity e : world.loadedEntityList) {
+					if (e.id == entityId) {
+						entity = e;
+						break;
+					}
 				}
-			}
 
-			if (entity == null) {
-				System.err.println("[Kaifcraft] Не удалось найти сущность с ID: " + entityId);
-				return;
-			}
+				if (entity == null) {
+					System.err.println("[Kaifcraft] Не удалось найти сущность с ID: " + entityId);
+					return;
+				}
 
-			boolean disableAI = dataInputStream.readBoolean();
-			if (entity instanceof IKaifNbt) {
-				CompoundTag tag = ((IKaifNbt) entity).getKaifData();
-				tag.putBoolean("DisableAI", disableAI);
-				System.out.println("[Kaifcraft] DisableAI установлен в " + disableAI + " для " + entity.getClass().getSimpleName());
-			} else {
-				System.err.println("[Kaifcraft] Сущность не реализует IKaifNbt");
-			}
+				boolean disableAI = dataInputStream.readBoolean();
+				if (entity instanceof IKaifNbt) {
+					CompoundTag tag = ((IKaifNbt) entity).getKaifData();
+					tag.putBoolean("DisableAI", disableAI);
+					System.out.println("[Kaifcraft] DisableAI установлен в " + disableAI + " для " + entity.getClass().getSimpleName());
+				} else {
+					System.err.println("[Kaifcraft] Сущность не реализует IKaifNbt");
+				}
 
-		} catch (IOException e) {
-			System.err.println("[Kaifcraft] Ошибка при чтении пакета Kaif|Creeper: " + e);
+			} catch (IOException e) {
+				System.err.println("[Kaifcraft] Ошибка при чтении пакета Kaif|Creeper: " + e);
+			}
+		} else if ("KaifBluntHold".equals(packet.channel)) {
+			System.out.println("[Kaifcraft] === Обработка KaifBluntHold начата ===");
+			try (ByteArrayInputStream byteInput = new ByteArrayInputStream(packet.data);
+				 DataInputStream dataInputStream = new DataInputStream(byteInput)) {
+
+				boolean holding = dataInputStream.readBoolean();
+				ItemStack held = playerEntity.getHeldItem();
+				if (held != null && held.getItem() instanceof ItemBlunt) {
+					CompoundTag tag = held.getData();
+					tag.putBoolean("ClientHolding", holding);
+					System.out.println("[Kaifcraft] ClientHolding = " + holding);
+				} else {
+					System.err.println("[Kaifcraft] Нет ItemBlunt в руке игрока");
+				}
+
+			} catch (IOException e) {
+				System.err.println("[Kaifcraft] Ошибка при чтении пакета Kaif|BluntHold: " + e);
+			}
+		} else {
+			System.out.println("[Kaifcraft] Получен неизвестный канал: " + packet.channel);
 		}
+
 	}
 }
-
