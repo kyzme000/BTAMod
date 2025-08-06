@@ -1,6 +1,8 @@
 package kuzme.kaifcraft.item;
 
 
+import com.mojang.nbt.tags.CompoundTag;
+import com.mojang.nbt.tags.IntTag;
 import kuzme.kaifcraft.entity.EntitySmoke;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.player.Player;
@@ -13,8 +15,6 @@ import java.util.Random;
 
 public class ItemBlunt extends Item {
 
-	public int reloadTimer;
-
 	public final Random random = new Random();
 
 
@@ -22,13 +22,24 @@ public class ItemBlunt extends Item {
 		super(name, namespaceId, id);
 	}
 
+	private static int getCooldown(ItemStack stack) {
+		CompoundTag tag = stack.getData();
+		return tag.getInteger("ReloadTimer");
+	}
+
+	private static void setCooldown(ItemStack stack, int ticks) {
+		CompoundTag tag = stack.getData();
+		tag.put("ReloadTimer", new IntTag(ticks));
+	}
+
+
 	public ItemStack onUseItem(ItemStack itemstack, World world, Player entityplayer) {
 
 		Vec3 plylook = entityplayer.getLookAngle();
 		Vec3 right = plylook.crossProduct(Vec3.getTempVec3(0, 1, 0)).normalize();
 
-
-		if (this.reloadTimer == 0) {
+		int reload = getCooldown(itemstack);
+		if (reload == 0) {
 			int count = 3;
 			double spacing = 0.6;
 			double speed = 0.05;
@@ -64,15 +75,18 @@ public class ItemBlunt extends Item {
 
 
 			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough", 0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
-			this.reloadTimer = 5;
+			setCooldown(itemstack, 100);
 		}
 		return itemstack;
 	}
 
 	@Override
 	public void inventoryTick(ItemStack itemstack, World world, Entity entity, int i, boolean flag) {
-		if(this.reloadTimer > 0) {
-			this.reloadTimer--;
+		if (!world.isClientSide) {
+			int cooldown = getCooldown(itemstack);
+			if (cooldown > 0) {
+				setCooldown(itemstack, cooldown - 1);
+			}
 		}
 	}
 
