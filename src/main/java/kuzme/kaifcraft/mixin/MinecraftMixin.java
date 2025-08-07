@@ -28,6 +28,7 @@ public abstract class MinecraftMixin {
 		boolean holding = Mouse.isButtonDown(1);
 
 		if (held != null && held.getItem() instanceof ItemBlunt) {
+
 			CompoundTag tag = held.getData();
 			boolean last = tag.getBoolean("LastHold");
 			if (last != holding) {

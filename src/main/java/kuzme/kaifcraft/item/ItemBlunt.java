@@ -18,43 +18,43 @@ public class ItemBlunt extends Item {
 		super(name, namespaceId, id);
 	}
 
+	public ItemStack onUseItem(ItemStack itemstack, World world, Player entityplayer) {
+
+		int flow = getFlowTimer(itemstack);
+		System.out.println(flow);
+		if (flow > 0) {
+			int prog = getFlowTicks(itemstack);
+			setFlowTicks(itemstack, prog + 1);
+			setFlowTimer(itemstack, flow - 1);
+
+			Vec3 look = entityplayer.getLookAngle().normalize();
+			double speed = 0.15;
+
+			// Частицы (клиентская сторона)
+			world.spawnParticle(
+				"bigsmoke",
+				entityplayer.x + look.x * 0.5,
+				entityplayer.y + entityplayer.getHeadHeight() - 0.2,
+				entityplayer.z + look.z * 0.5,
+				look.x * speed,
+				look.y * speed,
+				look.z * speed,
+				5
+			);
+		}
+		return itemstack;
+	}
+
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 		if (!(entity instanceof Player) || !selected) return;
-
-
 		Player player = (Player) entity;
 
-		if (world.isClientSide) {
-			System.out.println("test");
-			int flow = getFlowTimer(stack);
-			if (flow > 0) {
-				int prog = getFlowTicks(stack);
-				setFlowTicks(stack, prog + 1);
-				setFlowTimer(stack, flow - 1);
-
-				Vec3 look = player.getLookAngle().normalize();
-				double speed = 0.15;
-
-				// Частицы (клиентская сторона)
-				world.spawnParticle(
-					"bigsmoke",
-					player.x + look.x * 0.5,
-					player.y + player.getHeadHeight() - 0.2,
-					player.z + look.z * 0.5,
-					look.x * speed,
-					look.y * speed,
-					look.z * speed,
-					5
-				);
-			}
-		} else {
-			handleServerLogic(stack, world, player);
-		}
+		handleServerLogic(stack, world, player);
 	}
 
 	// === SERVER LOGIC ===
-	private void handleServerLogic(ItemStack stack, World world, Player player) {
+	private void handleServerLogic(ItemStack stack, World world, Player entityplayer) {
 		boolean isHolding = getClientHolding(stack);
 
 		// Кулдаун
@@ -65,7 +65,7 @@ public class ItemBlunt extends Item {
 
 		// Обработка струи дыма
 		if (getFlowTimer(stack) > 0) {
-			handleSmokeFlow(stack, world, player);
+			handleSmokeFlow(stack, world, entityplayer);
 			return;
 		}
 
@@ -77,20 +77,20 @@ public class ItemBlunt extends Item {
 			if (!getWasHolding(stack)) {
 				setWasHolding(stack, true);
 				setPlayedStartSound(stack, false);
-				player.sendMessage("начал удерживать ПКМ");
+				entityplayer.sendMessage("начал удерживать ПКМ");
 			}
 
 			if (!getPlayedStartSound(stack)) {
 				setPlayedStartSound(stack, true);
-				world.playSoundAtEntity(player, player, "kaifcraft:puff", 0.4F, 1.0F);
-				player.sendMessage("звук затяжки");
+				world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:puff", 0.4F, 1.0F);
+				entityplayer.sendMessage("звук затяжки");
 			}
 
-			player.sendMessage("время удержания: " + time);
+			entityplayer.sendMessage("время удержания: " + time);
 
 			if (time > 100) {
-				player.sendMessage("передозировка");
-				triggerSingleUse(stack, world, player);
+				entityplayer.sendMessage("передозировка");
+				triggerSingleUse(stack, world, entityplayer);
 				setCooldown(stack, 40);
 				resetUseState(stack);
 			}
@@ -101,18 +101,18 @@ public class ItemBlunt extends Item {
 		// Отпускание
 		if (getWasHolding(stack)) {
 			int held = getUseTime(stack);
-			player.sendMessage("ПКМ отпущен после " + held + " тиков");
+			entityplayer.sendMessage("ПКМ отпущен после " + held + " тиков");
 
 			if (held >= 5) {
 				setFlowTimer(stack, 30);
 				setFlowTicks(stack, 0);
-				world.playSoundAtEntity(player, player, "kaifcraft:blow", 1.0F, 1.0F);
+				world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:blow", 1.0F, 1.0F);
 				setCooldown(stack, 20);
-				player.sendMessage("запуск струи");
+				entityplayer.sendMessage("запуск струи");
 			} else {
-				triggerSingleUse(stack, world, player);
+				triggerSingleUse(stack, world, entityplayer);
 				setCooldown(stack, 100);
-				player.sendMessage("быстрое использование");
+				entityplayer.sendMessage("быстрое использование");
 			}
 
 			resetUseState(stack);
