@@ -51,7 +51,7 @@ public abstract class MinecraftMixin {
 				Minecraft.getMinecraft().getSendQueue().addToSendQueue(packet);
 			}
 		} catch (IOException e) {
-			System.err.println("[Kaifcraft][Client] Ошибка отправки пакета KaifBluntHold: " + e);
+			System.err.println("[Kaifcraft][Client] Ошибка отправки пакета Kaif|BluntHold: " + e);
 		}
 	}
 }

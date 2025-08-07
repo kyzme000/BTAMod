@@ -12,11 +12,7 @@ import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.phys.Vec3;
 import net.minecraft.core.world.World;
 
-import java.util.Random;
-
 public class ItemBlunt extends Item {
-
-	private final Random random = new Random();
 
 	public ItemBlunt(String name, String namespaceId, int id) {
 		super(name, namespaceId, id);
@@ -24,13 +20,42 @@ public class ItemBlunt extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-		if (!(entity instanceof Player) || world.isClientSide || !selected) return;
+		if (!(entity instanceof Player) || !selected) return;
+
 
 		Player player = (Player) entity;
 
-		// DEBUG
-		player.sendMessage("[Debug] selected: " + selected);
-		player.sendMessage("[Debug] ClientHolding: " + getClientHolding(stack));
+		if (world.isClientSide) {
+			System.out.println("test");
+			int flow = getFlowTimer(stack);
+			if (flow > 0) {
+				int prog = getFlowTicks(stack);
+				setFlowTicks(stack, prog + 1);
+				setFlowTimer(stack, flow - 1);
+
+				Vec3 look = player.getLookAngle().normalize();
+				double speed = 0.15;
+
+				// Частицы (клиентская сторона)
+				world.spawnParticle(
+					"bigsmoke",
+					player.x + look.x * 0.5,
+					player.y + player.getHeadHeight() - 0.2,
+					player.z + look.z * 0.5,
+					look.x * speed,
+					look.y * speed,
+					look.z * speed,
+					5
+				);
+			}
+		} else {
+			handleServerLogic(stack, world, player);
+		}
+	}
+
+	// === SERVER LOGIC ===
+	private void handleServerLogic(ItemStack stack, World world, Player player) {
+		boolean isHolding = getClientHolding(stack);
 
 		// Кулдаун
 		int cd = getCooldown(stack);
@@ -38,15 +63,13 @@ public class ItemBlunt extends Item {
 			setCooldown(stack, cd - 1);
 		}
 
-		// Струя
+		// Обработка струи дыма
 		if (getFlowTimer(stack) > 0) {
 			handleSmokeFlow(stack, world, player);
 			return;
 		}
 
-		boolean isHolding = getClientHolding(stack);
-
-		// Удержание
+		// Логика удержания
 		if (isHolding) {
 			int time = getUseTime(stack) + 1;
 			setUseTime(stack, time);
@@ -106,18 +129,30 @@ public class ItemBlunt extends Item {
 			Vec3 look = player.getLookAngle().normalize();
 			double speed = 0.15;
 
-			world.spawnParticle(
-				"bigsmoke",
+			EntitySmoke smoke = new EntitySmoke(world,
 				player.x + look.x * 0.5,
 				player.y + player.getHeadHeight() - 0.2,
-				player.z + look.z * 0.5,
-				look.x * speed,
-				look.y * speed,
-				look.z * speed,
-				5
+				player.z + look.z * 0.5
 			);
+			world.entityJoinedWorld(smoke);
+
 			player.sendMessage("струя тикает: " + prog);
 		}
+	}
+
+	private void triggerSingleUse(ItemStack stack, World world, Player player) {
+		if (world.isClientSide) return;
+
+		Vec3 look = player.getLookAngle().normalize();
+		EntitySmoke smoke = new EntitySmoke(world,
+			player.x + look.x * 0.5,
+			player.y + player.getHeadHeight() - 0.2,
+			player.z + look.z * 0.5
+		);
+		world.entityJoinedWorld(smoke);
+
+		world.playSoundAtEntity(player, player, "kaifcraft:puff", 1.0F, 1.0F);
+		player.sendMessage("SMOKENTITY");
 	}
 
 	// — NBT —
@@ -127,28 +162,6 @@ public class ItemBlunt extends Item {
 
 	private static boolean getClientHolding(ItemStack stack) {
 		return getTag(stack).getBoolean("ClientHolding");
-	}
-
-	private void triggerSingleUse(ItemStack stack, World world, Player player) {
-		if (world.isClientSide) return; // Спавн только на сервере
-
-		// Получаем вектор взгляда игрока
-		Vec3 look = player.getLookAngle().normalize();
-
-		// Смещение спавна впереди игрока (0.5 блока)
-		double spawnX = player.x + look.x * 0.5;
-		double spawnY = player.y + player.getHeadHeight() - 0.2; // чуть ниже глаз
-		double spawnZ = player.z + look.z * 0.5;
-
-		// Создаём и спаунем дымовую сущность
-		EntitySmoke smoke = new EntitySmoke(world, spawnX, spawnY, spawnZ);
-
-		world.entityJoinedWorld(smoke);
-
-		// Проигрываем звук у игрока
-		world.playSoundAtEntity(player, player, "kaifcraft:puff", 1.0F, 1.0F);
-
-		player.sendMessage("SMOKENTITY");
 	}
 
 	private static int getCooldown(ItemStack stack) { return getTag(stack).getInteger("ReloadTimer"); }
@@ -169,6 +182,4 @@ public class ItemBlunt extends Item {
 		setWasHolding(stack, false);
 		setPlayedStartSound(stack, false);
 	}
-
-
 }
