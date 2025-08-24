@@ -82,12 +82,10 @@ public class ItemBlunt extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack itemstack, World world, Entity entity, int i, boolean flag) {
-		if (!world.isClientSide) {
 			int cooldown = getCooldown(itemstack);
 			if (cooldown > 0) {
 				setCooldown(itemstack, cooldown - 1);
 			}
-		}
 	}
 
 

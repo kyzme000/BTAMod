@@ -29,7 +29,6 @@ public abstract class MobSpiderMixin extends MobMonster implements IKaifNbt {
 	public void setDisableAITimer(int ticks) {
 		kaifData.putInt("DisableAITimer", ticks);
 		kaifData.putBoolean("DisableAI", true);
-		System.out.println("[MobSkeletonMixin] Set DisableAITimer = " + ticks);
 	}
 
 	// сохранение/загрузка тега
