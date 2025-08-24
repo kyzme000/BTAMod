@@ -10,6 +10,7 @@ import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.util.phys.Vec3;
 import net.minecraft.core.world.World;
+import turniplabs.halplibe.helper.EnvironmentHelper;
 
 import java.util.Random;
 
@@ -39,11 +40,28 @@ public class ItemBlunt extends Item {
 		Vec3 right = plylook.crossProduct(Vec3.getTempVec3(0, 1, 0)).normalize();
 
 		int reload = getCooldown(itemstack);
-		if (reload == 0) {
+		if (reload != 0) return itemstack;
+
+		//  сервер
+		if (EnvironmentHelper.isServerEnvironment() || EnvironmentHelper.isSinglePlayer()) {
+
+			double distanceForward = 2;
+			double entitySpawnX = entityplayer.x + plylook.x * distanceForward;
+			double entitySpawnY = entityplayer.y + plylook.y * distanceForward;
+			double entitySpawnZ = entityplayer.z + plylook.z * distanceForward;
+
+			EntitySmoke smoke = new EntitySmoke(world, entitySpawnX, entitySpawnY, entitySpawnZ);
+			world.entityJoinedWorld(smoke);
+
+			setCooldown(itemstack, 100);
+		}
+
+		// клиент
+		if (!EnvironmentHelper.isServerEnvironment() || EnvironmentHelper.isSinglePlayer()) {
+
 			int count = 3;
 			double spacing = 0.6;
 			double speed = 0.05;
-			double distanceForward = 2;
 
 			for (int i = 0; i < count; i++) {
 				double offsetIndex = i - (count - 1) / 2.0;
@@ -57,28 +75,20 @@ public class ItemBlunt extends Item {
 				double spawnZ = entityplayer.z + plylook.z * 0.5 + offsetZ;
 
 				Vec3 direction = entityplayer.getLookAngle().normalize();
-
 				double dx = direction.x * speed;
 				double dy = direction.y * speed;
 				double dz = direction.z * speed;
 
 				world.spawnParticle("bigsmoke", spawnX, spawnY, spawnZ, dx, dy, dz, 2);
 			}
-			double entitySpawnX = entityplayer.x + plylook.x * distanceForward;
-			double entitySpawnY = entityplayer.y + plylook.y * distanceForward;
-			double entitySpawnZ = entityplayer.z + plylook.z * distanceForward;
 
-
-		    EntitySmoke smoke = new EntitySmoke(world, entitySpawnX, entitySpawnY, entitySpawnZ);
-		    world.entityJoinedWorld(smoke);
-
-
-
-			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough", 0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
-			setCooldown(itemstack, 100);
+			world.playSoundAtEntity(entityplayer, entityplayer, "kaifcraft:cough",
+				0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
 		}
+
 		return itemstack;
 	}
+
 
 	@Override
 	public void inventoryTick(ItemStack itemstack, World world, Entity entity, int i, boolean flag) {
