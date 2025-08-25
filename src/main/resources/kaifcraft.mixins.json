@@ -10,6 +10,7 @@
       "accessors.MobCreeperAccessor"
     ],
     "client": [
+      "PacketHandlerClientMixin"
     ],
     "server": [
       "PacketHandlerServerMixin"

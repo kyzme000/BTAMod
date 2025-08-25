@@ -4,6 +4,7 @@ package kuzme.kaifcraft.item;
 import com.mojang.nbt.tags.CompoundTag;
 import com.mojang.nbt.tags.IntTag;
 import kuzme.kaifcraft.entity.EntitySmoke;
+import kuzme.kaifcraft.util.KaifNet;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.item.Item;
@@ -43,7 +44,7 @@ public class ItemBlunt extends Item {
 		if (reload != 0) return itemstack;
 
 		//  сервер
-		if (EnvironmentHelper.isServerEnvironment() || EnvironmentHelper.isSinglePlayer()) {
+		if (EnvironmentHelper.isServerEnvironment()) {
 
 			double distanceForward = 2;
 			double entitySpawnX = entityplayer.x + plylook.x * distanceForward;
@@ -53,11 +54,37 @@ public class ItemBlunt extends Item {
 			EntitySmoke smoke = new EntitySmoke(world, entitySpawnX, entitySpawnY, entitySpawnZ);
 			world.entityJoinedWorld(smoke);
 
-			setCooldown(itemstack, 100);
+			int count = 3;
+			double spacing = 0.6;
+			double speed = 0.05;
+
+			for (int i = 0; i < count; i++) {
+				double offsetIndex = i - (count - 1) / 2.0;
+
+				double offsetX = right.x * offsetIndex * spacing;
+				double offsetY = right.y * offsetIndex * spacing;
+				double offsetZ = right.z * offsetIndex * spacing;
+
+				double spawnX = entityplayer.x + plylook.x * 0.5 + offsetX;
+				double spawnY = entityplayer.y + entityplayer.getHeadHeight() + plylook.y * 0.5 + offsetY;
+				double spawnZ = entityplayer.z + plylook.z * 0.5 + offsetZ;
+
+				Vec3 direction = entityplayer.getLookAngle().normalize();
+				double dx = direction.x * speed;
+				double dy = direction.y * speed;
+				double dz = direction.z * speed;
+
+				KaifNet.sendParticleToNearby(world, spawnX, spawnY, spawnZ, "bigsmoke", dx, dy, dz, 0, 20);
+			}
+
+			KaifNet.sendSoundToNearby(world, entityplayer.x, entityplayer.y, entityplayer.z,"kaifcraft:cough",
+				0.45F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F);
+
+				setCooldown(itemstack, 100);
 		}
 
 		// клиент
-		if (!EnvironmentHelper.isServerEnvironment() || EnvironmentHelper.isSinglePlayer()) {
+		if (EnvironmentHelper.isSinglePlayer()) {
 
 			int count = 3;
 			double spacing = 0.6;

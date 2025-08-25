@@ -5,6 +5,7 @@ import kuzme.kaifcraft.util.IKaifNbt;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.monster.MobCreeper;
 import net.minecraft.core.net.packet.PacketCustomPayload;
+import net.minecraft.core.world.World;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.entity.player.PlayerServer;
 import net.minecraft.server.net.handler.PacketHandlerServer;
@@ -15,9 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
 
 @Mixin(value = PacketHandlerServer.class, remap = false)
 public abstract class PacketHandlerServerMixin {
@@ -70,5 +69,6 @@ public abstract class PacketHandlerServerMixin {
 			System.err.println("[Kaifcraft] Ошибка при чтении пакета Kaif|Creeper: " + e);
 		}
 	}
+
 }
 
